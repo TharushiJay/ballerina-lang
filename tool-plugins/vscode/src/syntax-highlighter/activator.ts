@@ -21,6 +21,7 @@ import { setEditorDecorations } from './highlighter';
 
 export function activate(ballerinaExtInstance: BallerinaExtension) {
     const context = <ExtensionContext>ballerinaExtInstance.context;
+    // const langClient = <ExtendedLangClient> ballerinaExtInstance.langClient;
     const highlightingInfo: { line: number, token: string }[] =
         [{ line: 0, token: "WzAsIDMsIDAsIDUsMiwgMSwgMTAsIDUsIDBd" }, //[0, 3, 0, 5,2, 1, 10, 5, 0]
         { line: 1, token: "WzE2LCAyLCAxLCAyMCwgMywgMCwgMjUsIDIsIDFd" }]; //[16, 2, 1, 20, 3, 0, 25, 2, 1]
@@ -28,6 +29,9 @@ export function activate(ballerinaExtInstance: BallerinaExtension) {
     let disposable = commands.registerCommand('ballerina.highlightSyntax', () => {
         setEditorDecorations(highlightingInfo);
     });
-    
+    ballerinaExtInstance.onReady().then(() => {
+
+    });
+
     context.subscriptions.push(disposable);
 }

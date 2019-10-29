@@ -28,7 +28,7 @@ public class BallerinaSyntaxHighlightServiceImpl implements BallerinaSyntaxHighl
 
     public CompletableFuture<BallerinaHighlightingResponse> list(BallerinaHighlightingRequest request) {
 
-//        request.getParams();
+        request.getParams();
         BallerinaHighlightingResponse reply = new BallerinaHighlightingResponse();
         reply.setParams("Done");
         return CompletableFuture.supplyAsync(() -> reply);
