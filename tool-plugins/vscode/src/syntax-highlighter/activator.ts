@@ -19,7 +19,7 @@ import { BallerinaExtension } from '../core';
 import { Highlighter } from './highlighter';
 // import { SemanticHighlightingInformation } from './model';
 import { ExtendedLangClient } from '../core/extended-language-client';
-import { window, workspace } from 'vscode';
+import { window, workspace, TextDocument } from 'vscode';
 import { SemanticHighlightingParams } from './model';
 
 export function activate(ballerinaExtInstance: BallerinaExtension) {
@@ -35,13 +35,20 @@ export function activate(ballerinaExtInstance: BallerinaExtension) {
         }
     });
 
-    workspace.onDidOpenTextDocument(open=>{
+    window.onDidChangeActiveTextEditor(change=>{
+        let activeEditor = window.activeTextEditor;
+            if (!activeEditor) { return; }
+        let fileUri:string = activeEditor.document.uri.path;
+        applyHighlights(fileUri);
+    });
+
+    workspace.onDidCloseTextDocument(close=>{
         highlighter.remove();
     });
 
     ballerinaExtInstance.onReady().then(() => {
         langClient.onNotification('window/highlighting',(semanticHighlightingParams:SemanticHighlightingParams)=>{
-            highlighter.setEditorDecorations(semanticHighlightingParams.lines);
+            highlighter.setEditorDecorations(semanticHighlightingParams);
         });
     })
         .catch((e) => {

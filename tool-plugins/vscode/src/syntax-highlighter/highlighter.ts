@@ -1,11 +1,13 @@
 import { Base64 } from 'js-base64';
-import { HighlightToken, SemanticHighlightingInformation } from './model';
+import { HighlightToken, SemanticHighlightingInformation, SemanticHighlightingParams } from './model';
 import { Range, window, TextEditorDecorationType } from 'vscode';
 import { getScopeColor, getScopeName } from './scopeTree';
 
 export class Highlighter {
 
-    private decorationTypes: { [line: number]: TextEditorDecorationType; } = {};
+    // private decorationTypes: { [line: number]: TextEditorDecorationType; } = {};
+    private fileDecorationTypes : { [fileUri:string]: { [line: number]: TextEditorDecorationType; }} = {};
+    private fileUri: string = "";
 
     public decodeTokens(element: SemanticHighlightingInformation): HighlightToken[] {
         const tokenArray: HighlightToken[] = [];
@@ -34,7 +36,9 @@ export class Highlighter {
         return highlightByScope;
     }
 
-    public setEditorDecorations(highlightingInformation: SemanticHighlightingInformation[]) {
+    public setEditorDecorations(semanticHighlightingParams: SemanticHighlightingParams) {
+        this.fileUri = semanticHighlightingParams.textDocument;
+        let highlightingInformation: SemanticHighlightingInformation[] = semanticHighlightingParams.lines;
         highlightingInformation.forEach(highlightingInfo => {
             const scopeObj = this.highlightLines(highlightingInfo);
             let activeEditor = window.activeTextEditor;
@@ -43,27 +47,32 @@ export class Highlighter {
                 let decorationType = window.createTextEditorDecorationType({
                     color: getScopeColor(getScopeName(Number(key)))
                 });
-                if (!this.decorationTypes[highlightingInfo.line]) {
-                    this.decorationTypes[highlightingInfo.line] = decorationType;
+                if (!this.fileDecorationTypes[this.fileUri]) {
+                    this.fileDecorationTypes[this.fileUri] = {};
+                    this.fileDecorationTypes[this.fileUri][highlightingInfo.line] = decorationType;
+                    activeEditor.setDecorations(decorationType, scopeObj[key]);
+                }
+                else if ( !this.fileDecorationTypes[this.fileUri][highlightingInfo.line]) {
+                    this.fileDecorationTypes[this.fileUri][highlightingInfo.line] = decorationType;
                     activeEditor.setDecorations(decorationType, scopeObj[key]);
                 }
                 else
                 {
-                    activeEditor.setDecorations(this.decorationTypes[highlightingInfo.line],scopeObj[key]);
+                    activeEditor.setDecorations(this.fileDecorationTypes[this.fileUri][highlightingInfo.line],scopeObj[key]);
                 }
             }
         });
     }
 
     public remove() {
-        this.decorationTypes = {};
+        this.fileDecorationTypes[this.fileUri] = {};
     }
     public dispose(start: number, end: number) {
 
         for (let line = start; line <= end; line++) {
-            if (this.decorationTypes[line]) {
-                this.decorationTypes[line].dispose();
-                delete this.decorationTypes[line];
+            if (this.fileDecorationTypes[this.fileUri][line]) {
+                this.fileDecorationTypes[this.fileUri][line].dispose();
+                delete this.fileDecorationTypes[this.fileUri][line];
             }
         }
     }
