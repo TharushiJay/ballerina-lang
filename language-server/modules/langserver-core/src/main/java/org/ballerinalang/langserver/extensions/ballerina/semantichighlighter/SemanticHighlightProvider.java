@@ -60,6 +60,7 @@ public class SemanticHighlightProvider {
         LSModuleCompiler.getBLangPackages(context, docManager, null, true, true, true);
 
 //        highlights = new ArrayList<SemanticHighlightProvider.HighlightInfo>();
+        highlights = context.get(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY);
 //        context.put(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY, highlights);
 
         SemanticHighlightingVisitor semanticHighlightingVisitor = new SemanticHighlightingVisitor(context);
