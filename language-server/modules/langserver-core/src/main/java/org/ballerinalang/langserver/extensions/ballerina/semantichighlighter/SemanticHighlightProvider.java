@@ -24,8 +24,10 @@ import org.ballerinalang.langserver.compiler.LSContext;
 import org.ballerinalang.langserver.compiler.LSModuleCompiler;
 import org.ballerinalang.langserver.compiler.exception.CompilationFailedException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
+import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.wso2.ballerinalang.compiler.tree.BLangIdentifier;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.util.diagnotic.BDiagnostic;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -57,8 +59,8 @@ public class SemanticHighlightProvider {
 
         LSModuleCompiler.getBLangPackages(context, docManager, null, true, true, true);
 
-        highlights = new ArrayList<SemanticHighlightProvider.HighlightInfo>();
-        context.put(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY, highlights);
+//        highlights = new ArrayList<SemanticHighlightProvider.HighlightInfo>();
+//        context.put(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY, highlights);
 
         SemanticHighlightingVisitor semanticHighlightingVisitor = new SemanticHighlightingVisitor(context);
         BLangPackage bLangPackage = context.get(DocumentServiceKeys.CURRENT_BLANG_PACKAGE_CONTEXT_KEY);
@@ -86,9 +88,18 @@ public class SemanticHighlightProvider {
     }
 
     public static void getToken(HighlightInfo element) {
-        int character = element.identifier.pos.sCol - 1;
-        int length = element.identifier.pos.eCol - element.identifier.pos.sCol;
-        int scope = element.scopeEnum.getScopeId();
+        int character;
+        int length;
+        int scope;
+        if (element.identifier != null) {
+            character = element.identifier.pos.sCol - 1;
+            length = element.identifier.pos.eCol - element.identifier.pos.sCol;
+            scope = element.scopeEnum.getScopeId();
+        } else {
+            character = element.diagnostic.getPosition().getStartColumn() - 1;
+            length = element.diagnostic.getPosition().getEndColumn() - element.diagnostic.getPosition().getStartColumn();
+            scope = element.scopeEnum.getScopeId();
+        }
 
         SemanticHighlightingToken highlightingToken = new SemanticHighlightingToken(character, length, scope);
 
@@ -122,10 +133,15 @@ public static class HighlightInfo {
 
     ScopeEnum scopeEnum;
     BLangIdentifier identifier;
+    Diagnostic diagnostic;
 
     public HighlightInfo(ScopeEnum scopeEnum, BLangIdentifier identifier) {
         this.scopeEnum = scopeEnum;
         this.identifier = identifier;
+    }
+    public HighlightInfo(ScopeEnum scopeEnum, Diagnostic diagnostic) {
+        this.scopeEnum = scopeEnum;
+        this.diagnostic = diagnostic;
     }
 }
 }

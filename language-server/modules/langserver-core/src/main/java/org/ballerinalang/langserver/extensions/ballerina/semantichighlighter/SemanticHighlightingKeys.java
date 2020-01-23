@@ -27,7 +27,7 @@ import java.util.List;
  * @since 1.1.0
  */
 
-class SemanticHighlightingKeys {
-    static final LSContext.Key<List<SemanticHighlightProvider.HighlightInfo>> SEMANTIC_HIGHLIGHTING_KEY
+public class SemanticHighlightingKeys {
+    public static final LSContext.Key<List<SemanticHighlightProvider.HighlightInfo>> SEMANTIC_HIGHLIGHTING_KEY
             = new LSContext.Key<>();
 }

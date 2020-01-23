@@ -58,6 +58,13 @@ class SemanticHighlightingVisitor extends LSNodeVisitor {
     public void visit(BLangPackage pkgNode) {
         List<TopLevelNode> topLevelNodes = pkgNode.topLevelNodes;
         topLevelNodes.forEach(topLevelNode -> this.acceptNode((BLangNode) topLevelNode)); //TODO filter worker lambdas
+//        pkgNode.diagCollector.getDiagnostics().forEach(bDiagnostic -> {
+//            if (bDiagnostic.code.getValue().equals("unused.import.module")) {
+//                SemanticHighlightProvider.HighlightInfo highlightInfo =
+//                        new SemanticHighlightProvider.HighlightInfo(ScopeEnum.UNUSED, bDiagnostic);
+//                highlights.add(highlightInfo);
+//            }
+//        });
     }
 
     @Override

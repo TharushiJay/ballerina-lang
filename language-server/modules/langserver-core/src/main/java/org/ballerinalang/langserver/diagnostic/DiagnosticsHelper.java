@@ -23,6 +23,9 @@ import org.ballerinalang.langserver.compiler.LSModuleCompiler;
 import org.ballerinalang.langserver.compiler.common.LSDocument;
 import org.ballerinalang.langserver.compiler.exception.CompilationFailedException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
+import org.ballerinalang.langserver.extensions.ballerina.semantichighlighter.ScopeEnum;
+import org.ballerinalang.langserver.extensions.ballerina.semantichighlighter.SemanticHighlightProvider;
+import org.ballerinalang.langserver.extensions.ballerina.semantichighlighter.SemanticHighlightingKeys;
 import org.ballerinalang.util.diagnostic.DiagnosticListener;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -44,6 +47,7 @@ import java.util.Map;
  */
 public class DiagnosticsHelper {
     private static final List<Diagnostic> EMPTY_DIAGNOSTIC_LIST = new ArrayList<>(0);
+    private static List<SemanticHighlightProvider.HighlightInfo> highlights;
     /**
      * Holds last sent diagnostics for the purpose of clear-off when publishing new diagnostics.
      */
@@ -87,6 +91,18 @@ public class DiagnosticsHelper {
       
         // Replace old map
         lastDiagnosticMap = diagnosticMap;
+
+        // Use diagnostics to highlight unused imports
+        highlights = new ArrayList<SemanticHighlightProvider.HighlightInfo>();
+        context.put(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY, highlights);
+
+        diagnostics.forEach(diagnostic -> {
+                    if (diagnostic.getCode().getValue().equals("unused.import.module")) {
+                SemanticHighlightProvider.HighlightInfo highlightInfo =
+                        new SemanticHighlightProvider.HighlightInfo(ScopeEnum.UNUSED, diagnostic);
+                highlights.add(highlightInfo);
+            }
+        });
     }
 
     /**
