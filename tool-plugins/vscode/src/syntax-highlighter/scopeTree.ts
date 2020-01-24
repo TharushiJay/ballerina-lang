@@ -74,10 +74,10 @@ export function getScopeColor(scope: string) {
     const node1 = new Node("endpoint.ballerina", "#F2A618");
     const tree = new ScopeTree(node1);
 
-    const node2 = new Node("unused.ballerina", "#FF751A");
+    const node2 = new Node("unused.ballerina", "#808080");
     tree.link(node1, node2);
 
-    const node5 = new Node("keyword.ballerina", "#FFFFFF");
+    const node5 = new Node("keyword.ballerina", "#FF751A");
     tree.link(node1, node5);
 
     const node3 = new Node("string.ballerina", "#000000");
