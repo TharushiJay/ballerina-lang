@@ -92,19 +92,21 @@ public class SemanticHighlightProvider {
         int character;
         int length;
         int scope;
+        int line;
         if (element.identifier != null) {
             character = element.identifier.pos.sCol - 1;
             length = element.identifier.pos.eCol - element.identifier.pos.sCol;
             scope = element.scopeEnum.getScopeId();
+            line = element.identifier.pos.sLine - 1;
         } else {
             character = element.diagnostic.getPosition().getStartColumn() - 1;
             length = element.diagnostic.getPosition().getEndColumn() - element.diagnostic.getPosition().getStartColumn();
             scope = element.scopeEnum.getScopeId();
+            line = element.diagnostic.getPosition().getStartLine() -1;
         }
 
         SemanticHighlightingToken highlightingToken = new SemanticHighlightingToken(character, length, scope);
 
-        int line = element.identifier.pos.sLine - 1;
         int[] token = {highlightingToken.getCharacter(),
                 highlightingToken.getLength(), highlightingToken.getScope()};
         if (lineInfo.get(line) != null) {
