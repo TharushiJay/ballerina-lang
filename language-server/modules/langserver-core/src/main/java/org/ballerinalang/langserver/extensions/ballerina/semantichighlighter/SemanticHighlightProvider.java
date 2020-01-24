@@ -19,13 +19,16 @@ package org.ballerinalang.langserver.extensions.ballerina.semantichighlighter;
 
 import com.google.common.primitives.Ints;
 import org.ballerinalang.langserver.client.ExtendedLanguageClient;
+import org.ballerinalang.langserver.compiler.CollectDiagnosticListener;
 import org.ballerinalang.langserver.compiler.DocumentServiceKeys;
 import org.ballerinalang.langserver.compiler.LSContext;
 import org.ballerinalang.langserver.compiler.LSModuleCompiler;
 import org.ballerinalang.langserver.compiler.exception.CompilationFailedException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
-import org.wso2.ballerinalang.compiler.tree.BLangIdentifier;
+import org.ballerinalang.util.diagnostic.Diagnostic;
+import org.ballerinalang.util.diagnostic.DiagnosticListener;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.util.CompilerContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -51,9 +54,10 @@ public class SemanticHighlightProvider {
     public static SemanticHighlightingParams getHighlights(LSContext context, WorkspaceDocumentManager docManager)
             throws CompilationFailedException, HighlightingFailedException {
 
+        // Identifies endpoint variables
         LSModuleCompiler.getBLangPackages(context, docManager, null, true, true, true);
 
-        List<SemanticHighlightProvider.HighlightInfo> highlights = new ArrayList<>();
+        List<HighlightInfo> highlights = new ArrayList<>();
         context.put(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY, highlights);
 
         SemanticHighlightingVisitor semanticHighlightingVisitor = new SemanticHighlightingVisitor(context);
@@ -67,12 +71,27 @@ public class SemanticHighlightProvider {
             throw new HighlightingFailedException("Couldn't find any highlight information!");
         }
 
+        // Identifies unused imports
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        LSModuleCompiler.getBLangPackages(context, docManager, null, true, true, true);
+        CompilerContext compilerContext = context.get(DocumentServiceKeys.COMPILER_CONTEXT_KEY);
+
+        if (compilerContext.get(DiagnosticListener.class) instanceof CollectDiagnosticListener) {
+            diagnostics = ((CollectDiagnosticListener) compilerContext.get(DiagnosticListener.class)).getDiagnostics();
+        }
+
+        diagnostics.forEach(diagnostic -> {
+            if (diagnostic.getCode().getValue().equals("unused.import.module")) {
+                DiagnosticHighlightInfo highlightInfo = new DiagnosticHighlightInfo(ScopeEnum.UNUSED, diagnostic);
+                highlights.add(highlightInfo);
+            }
+        });
+
         Map<Integer, int[]> lineInfo = new HashMap<>();
         ArrayList<SemanticHighlightingInformation> highlightsArr = new ArrayList<>();
         context.get(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY).forEach(element-> {
-            int line = element.identifier.pos.sLine - 1;
-            int[] token = getToken(element);
-
+                int[] token = getToken(element);
+                int line = getLine(element);
             if (lineInfo.get(line) != null) {
                 int[] cur = lineInfo.get(line);
                 lineInfo.put(line, Ints.concat(cur, token));
@@ -88,15 +107,15 @@ public class SemanticHighlightProvider {
     }
 
     private static int[] getToken(HighlightInfo element) {
-        int character = element.identifier.pos.sCol - 1;
-        int length = element.identifier.pos.eCol - element.identifier.pos.sCol;
-        int scope = element.scopeEnum.getScopeId();
-
-        SemanticHighlightingToken highlightingToken = new SemanticHighlightingToken(character, length, scope);
-
+        SemanticHighlightingToken highlightingToken = element.getHighlightInfo();
         int[] token = {highlightingToken.getCharacter(),
                 highlightingToken.getLength(), highlightingToken.getScope()};
         return token;
+
+    }
+
+    private static int getLine(HighlightInfo element) {
+        return element.getHighlightLine();
 
     }
 
@@ -108,20 +127,5 @@ public class SemanticHighlightProvider {
         SemanticHighlightingInformation highlightingInformation
                 = new SemanticHighlightingInformation(key, encodedToken);
         return highlightingInformation;
-    }
-
-/**
- * Highlight information for each token.
- *
- * @since 1.2.0
- */
-    public static class HighlightInfo {
-        ScopeEnum scopeEnum;
-        BLangIdentifier identifier;
-
-        public HighlightInfo(ScopeEnum scopeEnum, BLangIdentifier identifier) {
-            this.scopeEnum = scopeEnum;
-            this.identifier = identifier;
-        }
     }
 }

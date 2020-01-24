@@ -47,7 +47,7 @@ import java.util.List;
  * @since 1.2.0
  */
 class SemanticHighlightingVisitor extends LSNodeVisitor {
-    private final List<SemanticHighlightProvider.HighlightInfo> highlights;
+    private final List<HighlightInfo> highlights;
 
     SemanticHighlightingVisitor(LSContext context) {
         this.highlights = context.get(SemanticHighlightingKeys.SEMANTIC_HIGHLIGHTING_KEY);
@@ -141,8 +141,7 @@ class SemanticHighlightingVisitor extends LSNodeVisitor {
     @Override
     public void visit(BLangSimpleVariable varNode) {
         if (CommonUtil.isClientObject(varNode.symbol)) {
-            SemanticHighlightProvider.HighlightInfo highlightInfo =
-                    new SemanticHighlightProvider.HighlightInfo(ScopeEnum.ENDPOINT, varNode.name);
+            SymbolHighlightInfo highlightInfo = new SymbolHighlightInfo(ScopeEnum.ENDPOINT, varNode.name);
             highlights.add(highlightInfo);
             return;
         }
@@ -156,8 +155,7 @@ class SemanticHighlightingVisitor extends LSNodeVisitor {
         if (!CommonUtil.isClientObject(varRefExpr.symbol)) {
             return;
         }
-        SemanticHighlightProvider.HighlightInfo highlightInfo =
-                    new SemanticHighlightProvider.HighlightInfo(ScopeEnum.ENDPOINT, varRefExpr.variableName);
+        SymbolHighlightInfo highlightInfo = new SymbolHighlightInfo(ScopeEnum.ENDPOINT, varRefExpr.variableName);
         highlights.add(highlightInfo);
 
     }

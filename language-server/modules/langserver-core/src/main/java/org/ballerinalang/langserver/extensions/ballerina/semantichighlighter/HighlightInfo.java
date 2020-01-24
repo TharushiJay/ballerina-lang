@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,16 +17,19 @@
  */
 package org.ballerinalang.langserver.extensions.ballerina.semantichighlighter;
 
-import org.ballerinalang.langserver.compiler.LSContext;
-
-import java.util.List;
-
 /**
- * Syntax Highlight Keys for semantic syntax highlighting.
+ * Contains the highlight information for semantic syntax highlighting.
  *
  * @since 1.2.0
  */
-class SemanticHighlightingKeys {
-    static final LSContext.Key<List<HighlightInfo>> SEMANTIC_HIGHLIGHTING_KEY
-            = new LSContext.Key<>();
+public abstract class HighlightInfo {
+    ScopeEnum scopeEnum = null;
+
+    public HighlightInfo(ScopeEnum scopeEnum) {
+        this.scopeEnum = scopeEnum;
+    }
+
+    abstract SemanticHighlightingToken getHighlightInfo();
+
+    abstract int getHighlightLine();
 }
