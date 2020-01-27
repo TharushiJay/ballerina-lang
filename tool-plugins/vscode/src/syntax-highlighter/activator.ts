@@ -34,12 +34,12 @@ export function activate(ballerinaExtInstance: BallerinaExtension) {
         }
     });
 
-    workspace.onDidOpenTextDocument(open=>{
+    workspace.onDidOpenTextDocument(open => {
         highlighter.remove();
     });
 
     ballerinaExtInstance.onReady().then(() => {
-        langClient.onNotification('window/highlighting',(semanticHighlightingParams:SemanticHighlightingParams)=>{
+        langClient.onNotification('window/highlighting', (semanticHighlightingParams: SemanticHighlightingParams) => {
             highlighter.setEditorDecorations(semanticHighlightingParams.lines);
         });
     })

@@ -73,7 +73,6 @@ public class SemanticHighlightProvider {
 
         // Identifies unused imports
         List<Diagnostic> diagnostics = new ArrayList<>();
-        LSModuleCompiler.getBLangPackages(context, docManager, null, true, true, true);
         CompilerContext compilerContext = context.get(DocumentServiceKeys.COMPILER_CONTEXT_KEY);
 
         if (compilerContext.get(DiagnosticListener.class) instanceof CollectDiagnosticListener) {
@@ -111,12 +110,10 @@ public class SemanticHighlightProvider {
         int[] token = {highlightingToken.getCharacter(),
                 highlightingToken.getLength(), highlightingToken.getScope()};
         return token;
-
     }
 
     private static int getLine(HighlightInfo element) {
         return element.getHighlightLine();
-
     }
 
     private static SemanticHighlightingInformation getEncodedToken(Map.Entry mapElement, Map<Integer, int[]> lineInfo) {
