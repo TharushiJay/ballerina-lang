@@ -35,6 +35,7 @@ export class Highlighter {
     }
 
     public setEditorDecorations(highlightingInformation: SemanticHighlightingInformation[]) {
+        this.unhighlightImports(highlightingInformation);
         highlightingInformation.forEach(highlightingInfo => {
             const scopeObj = this.highlightLines(highlightingInfo);
             let activeEditor = window.activeTextEditor;
@@ -47,9 +48,8 @@ export class Highlighter {
                     this.decorationTypes[highlightingInfo.line] = decorationType;
                     activeEditor.setDecorations(decorationType, scopeObj[key]);
                 }
-                else
-                {
-                    activeEditor.setDecorations(this.decorationTypes[highlightingInfo.line],scopeObj[key]);
+                else {
+                    activeEditor.setDecorations(this.decorationTypes[highlightingInfo.line], scopeObj[key]);
                 }
             }
         });
@@ -66,5 +66,21 @@ export class Highlighter {
                 delete this.decorationTypes[line];
             }
         }
+    }
+
+    public getDecorations(): { [line: number]: TextEditorDecorationType; } {
+        return this.decorationTypes;
+    }
+
+    private unhighlightImports(highlightingInformation: SemanticHighlightingInformation[]) {
+        let initialHighlights = Object.keys(this.decorationTypes).map(Number);
+        let currentHighlights: number[] = [];
+        highlightingInformation.forEach(highlightingInfo => {
+            currentHighlights.push(highlightingInfo.line);
+        });
+        let difference = initialHighlights.filter(item => currentHighlights.indexOf(item) < 0);
+        difference.forEach(element => {
+            this.dispose(element, element);
+        });
     }
 }
