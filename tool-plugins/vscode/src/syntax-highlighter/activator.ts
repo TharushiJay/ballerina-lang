@@ -26,13 +26,13 @@ export function activate(ballerinaExtInstance: BallerinaExtension) {
     const langClient = <ExtendedLangClient>ballerinaExtInstance.langClient;
     const highlighter: Highlighter = new Highlighter();
 
-    workspace.onDidChangeTextDocument(change => {
-        if (change.contentChanges.length > 0) {
-            change.contentChanges.forEach(each => {
-                highlighter.dispose(each.range.start.line, each.range.end.line);
-            });
-        }
-    });
+    // workspace.onDidChangeTextDocument(change => {
+    //     if (change.contentChanges.length > 0) {
+    //         change.contentChanges.forEach(each => {
+    //             highlighter.dispose(each.range.start.line, each.range.end.line);
+    //         });
+    //     }
+    // });
 
     workspace.onDidOpenTextDocument(open => {
         highlighter.remove();

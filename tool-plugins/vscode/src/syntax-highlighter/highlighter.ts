@@ -35,7 +35,7 @@ export class Highlighter {
     }
 
     public setEditorDecorations(highlightingInformation: SemanticHighlightingInformation[]) {
-        this.unhighlightImports(highlightingInformation);
+        this.resetHighlights(highlightingInformation);
         highlightingInformation.forEach(highlightingInfo => {
             const scopeObj = this.highlightLines(highlightingInfo);
             let activeEditor = window.activeTextEditor;
@@ -72,7 +72,7 @@ export class Highlighter {
         return this.decorationTypes;
     }
 
-    private unhighlightImports(highlightingInformation: SemanticHighlightingInformation[]) {
+    private resetHighlights(highlightingInformation: SemanticHighlightingInformation[]) {
         let initialHighlights = Object.keys(this.decorationTypes).map(Number);
         let currentHighlights: number[] = [];
         highlightingInformation.forEach(highlightingInfo => {
